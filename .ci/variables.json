@@ -1,0 +1,65 @@
+{
+  "common": {
+    "variables": {
+      "all": {
+        "projectName": "ramshop",
+        "namespace": "#{projectName}#-#{environmentShort}#",
+        "domain": "example.com",
+        "fqdn": "#{subDomain}#.#{domain}#",
+        "ingressEnabled": "false",
+        "allowedServices": "",
+        "applicationPath": "",
+        "mongodbEnabled": "false",
+        "redisEnabled": "false",
+        "acrName": "acrName",
+        "dockerRegistry": "#{acrName}#.azurecr.io",
+        "aksName": "aksName",
+        "resourceGroupName": "resourceGroupName",
+        "resourcesCpuLimit": "250m",
+        "resourcesCpuRequest": "50m",
+        "resourcesMemLimit": "128Mi",
+        "resourcesMemRequest": "64Mi",
+        "serviceType": "services",
+        "hpaMaxReplicas": 4
+      },
+      "dev": {
+        "environmentShort": "dev",
+        "subDomain": "ramshop-#{environmentShort}#"
+      },
+      "qa": {
+        "environmentShort": "qa",
+        "subDomain": "ramshop-#{environmentShort}#"
+      },
+      "prd": {
+        "environmentShort": "prd",
+        "subDomain": "ramshop"
+      }
+    }
+  },
+  "articles": {
+    "variables": {
+      "all": {
+        "applicationName": "articles",
+        "mongodbEnabled": "true"
+      }
+    }
+  },
+  "cart": {
+    "variables": {
+      "all": {
+        "applicationName": "cart",
+        "mongodbEnabled": "true"
+      }
+    }
+  },
+  "frontend": {
+    "variables": {
+      "all": {
+        "applicationName": "frontend",
+        "ingressEnabled": "true",
+        "applicationPath": "/",
+        "serviceType": "clients"
+      }
+    }
+  }
+}
