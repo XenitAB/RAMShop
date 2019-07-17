@@ -1,0 +1,21 @@
+{{ if .Values.ingress.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Values.application.name }}-ingress
+  annotations:
+   kubernetes.io/ingress.class: "citrix-ingress"
+   ingress.citrix.com/insecure-termination: "allow"
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.global.project }}-{{ .Values.global.environmentShort }}.{{ .Values.global.topLevelDomain }}
+    secretName: {{ .Values.global.project }}-{{ .Values.global.environmentShort }}-cert
+  rules:
+  - host: {{ .Values.global.project }}-{{ .Values.global.environmentShort }}.{{ .Values.global.topLevelDomain }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ .Values.application.name }}
+          servicePort: {{ .Values.application.port }}
+{{ end }}

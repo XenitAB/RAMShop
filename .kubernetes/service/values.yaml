@@ -1,0 +1,32 @@
+global:
+  environmentShort: dev
+  project: ramshop
+  containerRegistry: acrprdwesgk.azurecr.io
+  registryCredentials: regcred
+  topLevelDomain: sgk.xenit.io
+
+application:
+  port: 8080
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  healthCheckPath: /healthz
+  healthCheckPort: 8080
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 250m
+  imagePullPolicy: Always
+  horizontalPodAutoscaler:
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
+
+ingress:
+  enabled: false

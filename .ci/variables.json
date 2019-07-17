@@ -4,23 +4,23 @@
       "all": {
         "projectName": "ramshop",
         "namespace": "#{projectName}#-#{environmentShort}#",
-        "domain": "example.com",
+        "domain": "sgk.xenit.io",
         "fqdn": "#{subDomain}#.#{domain}#",
         "ingressEnabled": "false",
         "allowedServices": "",
         "applicationPath": "",
         "mongodbEnabled": "false",
         "redisEnabled": "false",
-        "acrName": "acrName",
+        "acrName": "acrprdwesgk",
         "dockerRegistry": "#{acrName}#.azurecr.io",
-        "aksName": "aksName",
-        "resourceGroupName": "resourceGroupName",
+        "aksName": "aks-prd-we-sgk",
+        "resourceGroupName": "rg-prd-we-sgk",
         "resourcesCpuLimit": "250m",
         "resourcesCpuRequest": "50m",
         "resourcesMemLimit": "128Mi",
         "resourcesMemRequest": "64Mi",
-        "serviceType": "services",
-        "hpaMaxReplicas": 4
+        "serviceType": "backend",
+        "hpaMaxReplicas": 2
       },
       "dev": {
         "environmentShort": "dev",
@@ -39,8 +39,7 @@
   "articles": {
     "variables": {
       "all": {
-        "applicationName": "articles",
-        "mongodbEnabled": "true"
+        "applicationName": "articles"
       }
     }
   },
@@ -48,17 +47,31 @@
     "variables": {
       "all": {
         "applicationName": "cart",
-        "mongodbEnabled": "true"
+        "ingressEnabled": "true"
       }
     }
   },
-  "frontend": {
+  "stock": {
     "variables": {
       "all": {
-        "applicationName": "frontend",
+        "applicationName": "stock"
+      }
+    }
+  },
+  "shop": {
+    "variables": {
+      "all": {
+        "applicationName": "shop",
         "ingressEnabled": "true",
         "applicationPath": "/",
-        "serviceType": "clients"
+        "serviceType": "frontend"
+      }
+    }
+  },
+  "apigw": {
+    "variables": {
+      "all": {
+        "applicationName": "apigw"
       }
     }
   }

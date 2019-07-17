@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ required "Specify application name using: --set application.name=<name>" .Values.application.name }}
+  labels:
+    app: {{ .Values.application.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.application.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.application.name }}
+{{- if .Values.application.devBuildId }}
+        buildId: {{ .Values.application.devBuildId | quote }}
+{{- else }}
+        buildId: {{ required "Specify build Id using: --set application.buildId=<buildId>" .Values.application.buildId | quote }}
+{{- end }}
+    spec:
+      containers:
+{{- if .Values.application.devBuildId }}
+      - image: {{ .Values.application.remoteImage }}
+{{- else }}
+      - image: {{ .Values.global.containerRegistry }}/{{ .Values.global.project }}/{{ .Values.application.name }}:{{ required "Specify build Id using: --set application.buildId=<buildId>" .Values.application.buildId }}
+{{- end }}
+        name: {{ .Values.application.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.application.healthCheckPath }}
+            port: {{ .Values.application.healthCheckPort }}
+          initialDelaySeconds: {{ .Values.application.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.application.livenessProbe.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.application.healthCheckPath }}
+            port: {{ .Values.application.healthCheckPort }}
+          initialDelaySeconds: {{ .Values.application.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.application.readinessProbe.periodSeconds }}
+        resources:
+          requests:
+            memory: {{ .Values.application.resources.requests.memory }}
+            cpu: {{ .Values.application.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.application.resources.limits.memory }}
+            cpu: {{ .Values.application.resources.limits.cpu }}
+        ports:
+        - containerPort: {{ .Values.application.port }}
+{{- if .Values.application.devBuildId }}
+        imagePullPolicy: Always
+{{- else }}
+        imagePullPolicy: {{ .Values.application.imagePullPolicy }}
+{{- end }}
+        env:
+          - name: PORT
+            value: {{ .Values.application.port | quote }}
+          - name: NODE_ENV
+            value: {{ .Values.global.environmentShort | quote }}
+      imagePullSecrets:
+        - name: {{ .Values.global.registryCredentials }}

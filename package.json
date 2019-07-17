@@ -1,0 +1,17 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "src/backend-articles",
+    "src/backend-stock",
+    "src/backend-cart",
+    "src/frontend-shop",
+    "lib/logger"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^24.8.0"
+  },
+  "scripts": {},
+  "license": "MIT"
+}

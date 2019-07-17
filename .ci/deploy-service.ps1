@@ -177,15 +177,15 @@ Process {
 
             # Download and install helm
             $retrycount = 0
-            While(-not (test-path -LiteralPath "$($tmpDirectory)/get_helm.sh" -PathType Leaf)){
-                Try{
+            While (-not (test-path -LiteralPath "$($tmpDirectory)/get_helm.sh" -PathType Leaf)) {
+                Try {
                     Invoke-WebRequest -Uri https://raw.githubusercontent.com/helm/helm/master/scripts/get -OutFile "$($tmpDirectory)/get_helm.sh" -ErrorAction Stop
                 }
-                catch{
+                catch {
                     $waittime = get-random -Minimum 20 -Maximum 30
                     Start-Sleep -Seconds $waittime
                     $retrycount++
-                    If($retrycount -gt 5){
+                    If ($retrycount -gt 5) {
                         Throw "failed to download helm"
                     }
                 }
@@ -196,16 +196,16 @@ Process {
 
             # Download and install kubectl
             $retrycount = 0
-            While(-not (test-path -LiteralPath "$($tmpDirectory)/kubectl" -PathType Leaf)){
-                Try{
+            While (-not (test-path -LiteralPath "$($tmpDirectory)/kubectl" -PathType Leaf)) {
+                Try {
                     $latestKubectlVersion = (Invoke-WebRequest https://storage.googleapis.com/kubernetes-release/release/stable.txt -ErrorAction Stop).Content.Trim()
                     Invoke-WebRequest -Uri https://storage.googleapis.com/kubernetes-release/release/$($latestKubectlVersion)/bin/linux/amd64/kubectl -OutFile "$($tmpDirectory)/kubectl" -ErrorAction Stop
                 }
-                catch{
+                catch {
                     $waittime = get-random -Minimum 20 -Maximum 30
                     Start-Sleep -Seconds $waittime
                     $retrycount++
-                    If($retrycount -gt 5){
+                    If ($retrycount -gt 5) {
                         Throw "failed to download kubectl"
                     }
                 }
@@ -231,12 +231,19 @@ Process {
         }
     }
 
-    $applicationSrcPath = "$($PSScriptRoot)/../src/$($serviceType)/$($applicationName)"
+    $applicationSrcPath = "$($PSScriptRoot)/../src/$($serviceType)-$($applicationName)"
 
     try {
         # If running as devbuilder, run docker build/tag/push
         if ($devBuilder) {
-            Invoke-Call ([ScriptBlock]::Create("$dockerBin build --rm -f $($applicationSrcPath)/Dockerfile.dev -t $image $applicationSrcPath"))
+            if (Test-Path -PathType Leaf -Path "$($applicationSrcPath)/Dockerfile") {
+                $dockerFile = "$($applicationSrcPath)/Dockerfile"
+            }
+            else {
+                $dockerFile = "$($PSScriptRoot)/Dockerfile"
+            }
+
+            Invoke-Call ([ScriptBlock]::Create("$dockerBin build --rm --build-arg SERVICE=$($applicationName) --build-arg SERVICE_TYPE=$($serviceType) -f $($dockerFile) -t $image `"$($PSScriptRoot)/..`""))
             Invoke-Call ([ScriptBlock]::Create("$dockerBin tag $image $remoteImage"))
             Invoke-Call ([ScriptBlock]::Create("$dockerBin push $remoteImage"))
         }
