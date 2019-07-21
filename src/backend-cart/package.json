@@ -1,14 +1,14 @@
 {
-  "name": "cart",
+  "name": "@ramshop/cart",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc && webpack",
+    "build": "webpack",
     "start": "PORT=3000 node index.js",
     "test": "echo 'TODO: ADD TESTS!'"
   },
   "dependencies": {
+    "@ramshop/logger": "*",
     "express": "4.17.1",
-    "logger": "*",
     "webpack-cli": "^3.3.6",
     "webpack-node-externals": "^1.7.2"
   },
@@ -16,6 +16,7 @@
     "@types/express": "^4.17.0",
     "jest": "^24.8.0",
     "typescript": "^3.5.3",
-    "webpack": "^4.36.1"
+    "webpack": "^4.36.1",
+    "ts-loader": "^6.0.4"
   }
 }

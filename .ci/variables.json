@@ -47,7 +47,8 @@
     "variables": {
       "all": {
         "applicationName": "cart",
-        "ingressEnabled": "true"
+        "ingressEnabled": "true",
+        "applicationPath": "/api/v1/cart"
       }
     }
   },

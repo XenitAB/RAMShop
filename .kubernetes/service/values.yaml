@@ -27,6 +27,7 @@ application:
     minReplicas: 1
     maxReplicas: 4
     targetCPUUtilizationPercentage: 80
+  logLevel: info
 
 ingress:
   enabled: false

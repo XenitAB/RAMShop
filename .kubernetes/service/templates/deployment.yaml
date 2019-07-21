@@ -52,9 +52,15 @@ spec:
         imagePullPolicy: {{ .Values.application.imagePullPolicy }}
 {{- end }}
         env:
+          - name: DUMMY_VAR
+            value: "1"
           - name: PORT
             value: {{ .Values.application.port | quote }}
           - name: NODE_ENV
             value: {{ .Values.global.environmentShort | quote }}
+          - name: SERVICE_NAME
+            value: {{ .Values.application.name | quote }}
+          - name: LOG_LEVEL
+            value: {{ .Values.application.logLevel | quote }}
       imagePullSecrets:
         - name: {{ .Values.global.registryCredentials }}

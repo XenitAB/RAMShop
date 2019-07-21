@@ -2,13 +2,13 @@
   "name": "root",
   "private": true,
   "workspaces": [
+    "typings",
+    "lib/*",
     "src/backend-articles",
-    "src/backend-stock",
     "src/backend-cart",
-    "src/frontend-shop",
-    "lib/logger"
+    "src/backend-stock",
+    "src/frontend-shop"
   ],
-  "dependencies": {},
   "devDependencies": {
     "jest": "^24.8.0"
   },
