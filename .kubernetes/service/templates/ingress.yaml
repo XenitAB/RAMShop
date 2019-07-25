@@ -15,7 +15,8 @@ spec:
   - host: {{ .Values.global.project }}-{{ .Values.global.environmentShort }}.{{ .Values.global.topLevelDomain }}
     http:
       paths:
-      - backend:
+      - path: {{ .Values.application.path | default (printf "/%s" .Values.application.name) }}
+        backend:
           serviceName: {{ .Values.application.name }}
           servicePort: {{ .Values.application.port }}
 {{ end }}
