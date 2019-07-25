@@ -10,7 +10,7 @@ app.get("/healthz", (req, res) => {
 
 app.use(expressLogger);
 
-app.get("/cart/api/v1/echo", (req, res) => {
+app.get("/api/v1/cart/echo", (req, res) => {
   res.send("echo");
 });
 
