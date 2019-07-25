@@ -143,7 +143,19 @@ Process {
 
     switch ($PSCmdlet.ParameterSetName) {
         'devBuilder' {
-            $tmpDirectory = "/tmp"
+            if ($PSVersionTable.PSEdition -ne "Core") {
+                Write-Error "This script requires Powershell Core or else we can't use `$IsOS like `$IsWindows"
+            }
+
+            if ($IsWindows) {
+                $tmpDirectory = "$($ENV:TMP)"
+                $kubeConfig = "$($ENV:USERPROFILE)\.kube\config"
+            }
+            else {
+                $tmpDirectory = "/tmp"
+                $kubeConfig = "$($ENV:HOME)/.kube/config"
+            }
+            
             $image = "$($applicationName)-devbuilder:latest"
             $remoteImage = "$($dockerRegistry)/$($projectName)/$($image)"
             $hpaMaxReplicas = 1
@@ -153,8 +165,6 @@ Process {
                 $dockerBin = $(Get-Command docker -ErrorAction Stop)
                 $helmBin = $(Get-Command helm -ErrorAction Stop)
                 $kubectlBin = $(Get-Command kubectl -ErrorAction Stop)
-
-                $kubeConfig = "$($ENV:HOME)/.kube/config"
 
                 # Login to Azure Container Registry
                 $azBin = $(Get-Command az -ErrorAction Stop)
