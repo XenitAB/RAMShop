@@ -19,14 +19,11 @@ COPY src/${SERVICE_TYPE}-${SERVICE} ./src/${SERVICE_TYPE}-${SERVICE}
 
 RUN yarn workspace @${PACKAGE_SCOPE}/${SERVICE} build
 
-RUN ls ./src/${SERVICE_TYPE}-${SERVICE}/dist
-
 RUN yarn workspace ${SERVICE} run test; exit 0
 
 FROM node:lts-alpine
 ARG SERVICE_TYPE
 ARG SERVICE
-ENV WORKSPACE ${SERVICE}
 WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/src/${SERVICE_TYPE}-${SERVICE}/dist/lib.node.js ./index.js
