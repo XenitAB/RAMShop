@@ -35,7 +35,7 @@ stages:
         - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId) | grep -v "<missing>") -o $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
-        - publish: .ci/deploy-service.ps1
+        - publish: .ci
           artifact: ci
 
   - stage: Deploy_dev
