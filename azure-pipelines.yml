@@ -11,12 +11,29 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+        - task: CacheBeta@0
+          inputs:
+            key: |
+              RAMShop
+              docker
+              $(SERVICE_NAME)
+            path: $(Build.ArtifactStagingDirectory)
+          displayName: Cache Docker image
+
+        - script: |
+            docker load < $(Build.ArtifactStagingDirectory)/docker_cache_$(SERIVCE_NAME).tar
+          displayName: Load Docker image and layers
+          continueOnError: true
+
         - task: AzureCLI@1
           displayName: "Build and push image"
           inputs:
             azureSubscription: $(AZURE_SUBSCRIPTION)
             scriptLocation: inlineScript
             inlineScript: "pwsh .ci/deploy-service.ps1 -buildOnly -service $(SERVICE_NAME)"
+
+        - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId)) > $(Build.ArtifactStagingDirectory)/docker_cache_$(SERIVCE_NAME).tar
+          displayName: "Save docker cache"
 
   - stage: Deploy_dev
     dependsOn: [Build]
