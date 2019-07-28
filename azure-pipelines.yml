@@ -35,6 +35,9 @@ stages:
         - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId)) > $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
+        - publish: $(System.DefaultWorkingDirectory)/.ci/deploy.service.ps1
+          artifact: ci
+
   - stage: Deploy_dev
     dependsOn: [Build]
     jobs:
@@ -47,12 +50,14 @@ stages:
           runOnce:
             deploy:
               steps:
+              - download: current
+                artifact: ci
               - task: AzureCLI@1
-                displayName: "Build and push image"
+                displayName: "Deploy service"
                 inputs:
                   azureSubscription: $(AZURE_SUBSCRIPTION)
                   scriptLocation: inlineScript
-                  inlineScript: "pwsh .ci/deploy-service.ps1 -azureDevOps -service $(SERVICE_NAME) -environmentShort dev"
+                  inlineScript: "pwsh $(Pipeline.Workspace)/ci/deploy-service.ps1 -azureDevOps -service $(SERVICE_NAME) -environmentShort dev"
       - job: Integration_tests
         dependsOn: Deploy_dev
         pool:
