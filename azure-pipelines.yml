@@ -21,7 +21,7 @@ stages:
           displayName: Cache Docker image
 
         - script: |
-            docker load < $(Build.ArtifactStagingDirectory)/docker_cache_$(SERIVCE_NAME).tar
+            docker load < $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
           displayName: Load Docker image and layers
           continueOnError: true
 
@@ -32,7 +32,7 @@ stages:
             scriptLocation: inlineScript
             inlineScript: "pwsh .ci/deploy-service.ps1 -buildOnly -service $(SERVICE_NAME)"
 
-        - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId)) > $(Build.ArtifactStagingDirectory)/docker_cache_$(SERIVCE_NAME).tar
+        - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId)) > $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
   - stage: Deploy_dev
