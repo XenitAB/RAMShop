@@ -33,7 +33,12 @@ stages:
           runOnce:
             deploy:
               steps:
-              - script: "echo Hello world!"
+              - task: AzureCLI@1
+                displayName: "Build and push image"
+                inputs:
+                  azureSubscription: $(AZURE_SUBSCRIPTION)
+                  scriptLocation: inlineScript
+                  inlineScript: "pwsh .ci/deploy-service.ps1 -azureDevOps -service $(SERVICE_NAME) -environmentShort dev"
       - job: Integration_tests
         dependsOn: Deploy_dev
         pool:
