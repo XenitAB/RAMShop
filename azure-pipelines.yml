@@ -5,15 +5,39 @@
 
 trigger:
 - master
+- dev
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
+  - stage: Build
+    jobs:
+      - job:
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+        - task: AzureCLI@1
+          displayName: "Build and push image"
+          inputs:
+            azureSubscription: $(AZURE_SUBSCRIPTION)
+            scriptLocation: inlineScript
+            inlineScript: "pwsh .ci/deploy-service.ps1 -buildOnly -service $(SERVICE_NAME)"
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - stage: Deploy_dev
+    dependsOn: [Build]
+    jobs:
+      - deployment: Deploy_dev
+        pool:
+          vmImage: 'Ubuntu-latest'
+        
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - script: "echo Hello world!"
+      - job: Integration_tests
+        dependsOn: Deploy_dev
+        pool:
+          vmImage: Ubuntu-latest
+        steps:
+          - script: "echo integration tests"
+  
