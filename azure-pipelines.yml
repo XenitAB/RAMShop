@@ -21,7 +21,7 @@ stages:
           displayName: Cache Docker image
 
         - script: |
-            docker load < $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
+            docker load -i $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar || exit 0
           displayName: Load Docker image and layers
           continueOnError: true
 
