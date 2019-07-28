@@ -19,7 +19,7 @@ COPY src/${SERVICE_TYPE}-${SERVICE} ./src/${SERVICE_TYPE}-${SERVICE}
 
 RUN yarn workspace @${PACKAGE_SCOPE}/${SERVICE} build
 
-RUN yarn workspace ${SERVICE} run test; exit 0
+RUN yarn workspace @${PACKAGE_SCOPE}/${SERVICE} run test
 
 FROM node:lts-alpine
 ARG SERVICE_TYPE
