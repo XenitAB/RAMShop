@@ -32,7 +32,7 @@ stages:
             scriptLocation: inlineScript
             inlineScript: "pwsh .ci/deploy-service.ps1 -buildOnly -service $(SERVICE_NAME)"
 
-        - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId)) > $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
+        - script: docker save $(SERVICE_NAME) $(docker history -q $(SERVICE_NAME)) > $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
         - publish: $(System.DefaultWorkingDirectory)/.ci/deploy.service.ps1
