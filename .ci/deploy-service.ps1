@@ -25,10 +25,12 @@ Param(
     [Parameter(Mandatory = $true, ParameterSetName = 'devBuilder')]
     [Parameter(Mandatory = $true, ParameterSetName = 'azureDevOps')]
     [Parameter(Mandatory = $false, ParameterSetName = 'commonDeploy')]
+    [Parameter(Mandatory = $true, ParameterSetName = 'buildOnly')]
     [string]$service,
     [Parameter(Mandatory = $false, ParameterSetName = 'devBuilder')]
     [Parameter(Mandatory = $true, ParameterSetName = 'azureDevOps')]
     [Parameter(Mandatory = $true, ParameterSetName = 'commonDeploy')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'buildOnly')]
     [string]$environmentShort = "dev",
     [string]$variableFile = "$($PSScriptRoot)/variables.json",
     [Parameter(Mandatory = $true, ParameterSetName = 'devBuilder')]
@@ -37,7 +39,9 @@ Param(
     [switch]$azureDevOps,
     [Parameter(Mandatory = $true, ParameterSetName = 'commonDeploy')]
     [switch]$commonDeploy,
-    [switch]$followLogs
+    [switch]$followLogs,
+    [Parameter(Mandatory = $true, ParameterSetName = 'buildOnly')]
+    [switch]$buildOnly
 )
 
 Begin {
@@ -129,6 +133,35 @@ Begin {
             Set-Variable -Name $pair.name -Value $pair.value -Scope Script
         }
     }
+
+    function Invoke-BuildContainerImage {
+        try {
+            # Defined binaries
+            $dockerBin = $(Get-Command docker -ErrorAction Stop)
+
+            # Login to Azure Container Registry
+            $azBin = $(Get-Command az -ErrorAction Stop)
+            Invoke-Call ([ScriptBlock]::Create("$azBin acr login -n $($acrName)"))
+        }
+        catch {
+            $ErrorMessage = $_.Exception.Message
+            $FailedItem = $_.Exception.ItemName
+            Write-Output "Executable missing, see below error."
+            Write-Error "Message: $ErrorMessage`r`nItem: $FailedItem"
+            break
+        }
+
+        if (Test-Path -PathType Leaf -Path "$($applicationSrcPath)/Dockerfile") {
+            $dockerFile = "$($applicationSrcPath)/Dockerfile"
+        }
+        else {
+            $dockerFile = "$($PSScriptRoot)/Dockerfile"
+        }
+
+        Invoke-Call ([ScriptBlock]::Create("$dockerBin build --rm --build-arg SERVICE=$($applicationName) --build-arg SERVICE_TYPE=$($serviceType) --build-arg PACKAGE_SCOPE=$($projectName) -f $($dockerFile) -t $image `"$($PSScriptRoot)/..`""))
+        Invoke-Call ([ScriptBlock]::Create("$dockerBin tag $image $remoteImage"))
+        Invoke-Call ([ScriptBlock]::Create("$dockerBin push $remoteImage"))
+    }
 }
 Process {
     $serviceVariablesObject = Initialize-ServiceVariables -serviceObject $serviceVariablesObject -variableObject $commonVariablesAll
@@ -140,6 +173,7 @@ Process {
     }
     
     Set-ServiceVariables -serviceObject $serviceVariablesObject
+    $applicationSrcPath = "$($PSScriptRoot)/../src/$($serviceType)-$($applicationName)"
 
     switch ($PSCmdlet.ParameterSetName) {
         'devBuilder' {
@@ -162,13 +196,8 @@ Process {
     
             try {
                 # Defined binaries
-                $dockerBin = $(Get-Command docker -ErrorAction Stop)
                 $helmBin = $(Get-Command helm -ErrorAction Stop)
                 $kubectlBin = $(Get-Command kubectl -ErrorAction Stop)
-
-                # Login to Azure Container Registry
-                $azBin = $(Get-Command az -ErrorAction Stop)
-                Invoke-Call ([ScriptBlock]::Create("$azBin acr login -n $($acrName)"))
             }
             catch {
                 $ErrorMessage = $_.Exception.Message
@@ -177,6 +206,8 @@ Process {
                 Write-Error "Message: $ErrorMessage`r`nItem: $FailedItem"
                 break
             }
+
+            Invoke-BuildContainerImage
         }
         'azureDevOps' {
             #$tmpDirectory = $($ENV:SYSTEM_DEFAULTWORKINGDIRECTORY)
@@ -235,29 +266,20 @@ Process {
             Write-Output "Common deploy - exiting."
             exit 0
         }
+        'buildOnly' {
+            $image = "$($applicationName):$($buildId)"
+            $remoteImage = "$($dockerRegistry)/$($projectName)/$($image)"
+            Invoke-BuildContainerImage
+            Write-Output "Build complete - exiting."
+            exit 0
+        }
         default {
             Write-Error "Neither devBuilder or azureDevOps defined."
             exit 1
         }
     }
 
-    $applicationSrcPath = "$($PSScriptRoot)/../src/$($serviceType)-$($applicationName)"
-
     try {
-        # If running as devbuilder, run docker build/tag/push
-        if ($devBuilder) {
-            if (Test-Path -PathType Leaf -Path "$($applicationSrcPath)/Dockerfile") {
-                $dockerFile = "$($applicationSrcPath)/Dockerfile"
-            }
-            else {
-                $dockerFile = "$($PSScriptRoot)/Dockerfile"
-            }
-
-            Invoke-Call ([ScriptBlock]::Create("$dockerBin build --rm --build-arg SERVICE=$($applicationName) --build-arg SERVICE_TYPE=$($serviceType) --build-arg PACKAGE_SCOPE=$($projectName) -f $($dockerFile) -t $image `"$($PSScriptRoot)/..`""))
-            Invoke-Call ([ScriptBlock]::Create("$dockerBin tag $image $remoteImage"))
-            Invoke-Call ([ScriptBlock]::Create("$dockerBin push $remoteImage"))
-        }
-
         # Grab the current version running
         $currentImage = Invoke-Call ([ScriptBlock]::Create("$kubectlBin --kubeconfig=$($kubeConfig) --namespace=$($namespace) get deployment -l app=$($applicationName) -o jsonpath='{ .items[*].spec.template.spec.containers[*].image }'"))
 
