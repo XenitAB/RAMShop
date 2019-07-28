@@ -158,7 +158,7 @@ Begin {
             $dockerFile = "$($PSScriptRoot)/Dockerfile"
         }
 
-        Invoke-Call ([ScriptBlock]::Create("$dockerBin build --rm --build-arg SERVICE=$($applicationName) --build-arg SERVICE_TYPE=$($serviceType) --build-arg PACKAGE_SCOPE=$($projectName) -f $($dockerFile) -t $image `"$($PSScriptRoot)/..`""))
+        Invoke-Call ([ScriptBlock]::Create("$dockerBin build --build-arg SERVICE=$($applicationName) --build-arg SERVICE_TYPE=$($serviceType) --build-arg PACKAGE_SCOPE=$($projectName) -f $($dockerFile) -t $image `"$($PSScriptRoot)/..`""))
         Invoke-Call ([ScriptBlock]::Create("$dockerBin tag $image $remoteImage"))
         Invoke-Call ([ScriptBlock]::Create("$dockerBin push $remoteImage"))
     }
