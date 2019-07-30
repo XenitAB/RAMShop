@@ -11,6 +11,9 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+        - script: mkdir -p $(Pipeline.Workspace)/docker-cache
+          displayName: Create dir for cache
+
         - task: CacheBeta@0
           inputs:
             key: |
