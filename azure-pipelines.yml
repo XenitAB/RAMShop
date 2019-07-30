@@ -38,9 +38,6 @@ stages:
         - script: docker save $(SERVICE_NAME)-builder:latest $(docker history -q $(SERVICE_NAME)-builder:latest | grep -v "<missing>") -o $(Pipeline.Workspace)/docker-cache/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
-        - publish: .ci
-          artifact: ci
-
   - stage: Deploy_dev
     dependsOn: [Build]
     jobs:
@@ -55,8 +52,6 @@ stages:
               steps:
               - checkout: self
 
-              - download: current
-                artifact: ci
               - task: AzureCLI@1
                 displayName: "Deploy service"
                 inputs:
