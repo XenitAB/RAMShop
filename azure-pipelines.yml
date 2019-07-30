@@ -23,7 +23,6 @@ stages:
         - script: |
             docker load -i $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar || exit 0
           displayName: Load Docker image and layers
-          continueOnError: true
 
         - task: AzureCLI@1
           displayName: "Build and push image"
@@ -32,7 +31,7 @@ stages:
             scriptLocation: inlineScript
             inlineScript: "pwsh .ci/deploy-service.ps1 -buildOnly -service $(SERVICE_NAME)"
 
-        - script: docker save $(SERVICE_NAME):$(Build.BuildId) $(docker history -q $(SERVICE_NAME):$(Build.BuildId) | grep -v "<missing>") -o $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
+        - script: docker save $(SERVICE_NAME)-builder:latest $(docker history -q $(SERVICE_NAME)-builder:latest | grep -v "<missing>") -o $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
         - publish: .ci
