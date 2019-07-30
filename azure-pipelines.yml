@@ -17,11 +17,12 @@ stages:
               RAMShop
               docker
               $(SERVICE_NAME)
-            path: $(Build.ArtifactStagingDirectory)
+              $(Pipeline.Workspace)/yarn.lock
+            path: $(Pipeline.Workspace)/docker-cache
           displayName: Cache Docker image
 
         - script: |
-            docker load -i $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar || exit 0
+            docker load -i $(Pipeline.Workspace)/docker-cache/docker_cache_$(SERVICE_NAME).tar || exit 0
           displayName: Load Docker image and layers
 
         - task: AzureCLI@1
@@ -31,7 +32,7 @@ stages:
             scriptLocation: inlineScript
             inlineScript: "pwsh .ci/deploy-service.ps1 -buildOnly -service $(SERVICE_NAME)"
 
-        - script: docker save $(SERVICE_NAME)-builder:latest $(docker history -q $(SERVICE_NAME)-builder:latest | grep -v "<missing>") -o $(Build.ArtifactStagingDirectory)/docker_cache_$(SERVICE_NAME).tar
+        - script: docker save $(SERVICE_NAME)-builder:latest $(docker history -q $(SERVICE_NAME)-builder:latest | grep -v "<missing>") -o $(Pipeline.Workspace)/docker-cache/docker_cache_$(SERVICE_NAME).tar
           displayName: "Save docker cache"
 
         - publish: .ci
