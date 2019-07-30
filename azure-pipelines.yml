@@ -17,7 +17,7 @@ stages:
               RAMShop
               docker
               $(SERVICE_NAME)
-              $(Pipeline.Workspace)/yarn.lock
+              $(Build.SourcesDirectory)/yarn.lock
             path: $(Pipeline.Workspace)/docker-cache
           displayName: Cache Docker image
 
