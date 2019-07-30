@@ -53,6 +53,8 @@ stages:
           runOnce:
             deploy:
               steps:
+              - checkout: self
+
               - download: current
                 artifact: ci
               - task: AzureCLI@1
@@ -60,7 +62,7 @@ stages:
                 inputs:
                   azureSubscription: $(AZURE_SUBSCRIPTION)
                   scriptLocation: inlineScript
-                  inlineScript: "pwsh $(Pipeline.Workspace)/ci/deploy-service.ps1 -azureDevOps -service $(SERVICE_NAME) -environmentShort dev"
+                  inlineScript: "pwsh .ci/deploy-service.ps1 -azureDevOps -service $(SERVICE_NAME) -environmentShort dev"
       - job: Integration_tests
         dependsOn: Deploy_dev
         pool:
