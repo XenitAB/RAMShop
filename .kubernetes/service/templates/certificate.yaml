@@ -1,5 +1,5 @@
 {{ if .Values.ingress.enabled -}}
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: {{ .Values.global.project }}-{{ .Values.global.environmentShort }}-cert
@@ -8,7 +8,8 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
-  commonName: "{{ .Values.global.project }}-{{ .Values.global.environmentShort }}.{{ .Values.global.topLevelDomain }}"
+  dnsNames:
+    - "{{ .Values.global.project }}-{{ .Values.global.environmentShort }}.{{ .Values.global.topLevelDomain }}"
   acme:
     config:
     - dns01:
